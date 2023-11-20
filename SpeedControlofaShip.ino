@@ -58,6 +58,7 @@ ISR(TIMER0_COMPA_vect){
   if(timer0account == 40){
       PotentiometerValue = analogRead(A0);
       ControlCommand = ShipCommandProcess(PotentiometerValue);
+      //Serial.print(PotentiometerValue);
       timer0account = 0;
   }
   else{
@@ -73,20 +74,9 @@ void setup() {
   pinMode(ForwardOutputPin,OUTPUT);
   pinMode(AsternOutputPin,OUTPUT);
 
-  //PWM TEST
-  PWMTEST = analogRead(A1);
-
   Serial.begin(9600);
   noInterrupts();
-  //-----------------------------Timer0 OVF interrpution which 20Hz collect input 
-  TCCR0A = 0;
-  TCCR0B = 0;
-  TCNT0 = 0;
-  OCR0A = 255;
-  TCCR0A |= (1 << WGM01);
-  TCCR0B |= (1 << CS00);
-  TIMSK0 |= (1 << OCIE0A);
-  //-----------------------------Timer1 Fast PWM model(16MHz / 32 / 256 = 7:8125 kHz)
+    //-----------------------------Timer1 Fast PWM model(16MHz / 32 / 256 = 7:8125 kHz)
   /*
   TCCR1A = 0;
   TCCR1B = 0;
@@ -106,8 +96,16 @@ void setup() {
   TCCR1B |= (1 << CS11);
   TCCR1B &= ~(1 << CS12);
   */
-  TCCR2A = _BV(COM2A1) | _BV(WGM21) | _BV(WGM20);
-  TCCR2B = _BV(CS21)| _BV(CS20);
+  TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
+  TCCR2B = _BV(CS21) | _BV(CS20);
+  //-----------------------------Timer0 OVF interrpution which 20Hz collect input 
+  TCCR0A = 0;
+  TCCR0B = 0;
+  TCNT0 = 0;
+  OCR0A = 255;
+  TCCR0A |= (1 << WGM01);
+  TCCR0B |= (1 << CS00);
+  TIMSK0 |= (1 << OCIE0A);
   interrupts();
 
 }
@@ -119,12 +117,12 @@ void loop() {
 
     case 1:
       //Astern, PIN 10(100% PWM), PIN 9(0% PWM)
-      analogWrite(ForwardOutputPin,FullSpeed);
-      analogWrite(AsternOutputPin, FullSpeed);
-      PWMTEST = analogRead(A1);
-      //Serial.print("Execuated Astern \n");
-      Serial.print(PWMTEST);
-      Serial.print(", \n");
+      analogWrite(ForwardOutputPin,127);
+      //analogWrite(AsternOutputPin, 160);
+      
+      
+      pinMode(ForwardOutputPin,OUTPUT);
+      Serial.print("Execuated Astern \n");
       break;
 
     case 2:
@@ -132,7 +130,6 @@ void loop() {
       analogWrite(ForwardOutputPin,Stop);
       analogWrite(AsternOutputPin, Stop);
       Serial.print("Execuated Standby \n");
-      Serial.print(PWMTEST);
       break;
 
     case 3:
@@ -140,7 +137,6 @@ void loop() {
       analogWrite(ForwardOutputPin,FullSpeed);
       analogWrite(AsternOutputPin, Stop);
       Serial.print("Execuated  Forward\n");
-      Serial.print(PWMTEST);
       break;
 
     case 4:
@@ -148,7 +144,6 @@ void loop() {
       analogWrite(ForwardOutputPin,FullSpeed);
       analogWrite(AsternOutputPin, Stop);
       Serial.print("Execuated Linear \n");
-      Serial.print(PWMTEST);
       break;
 
     default:
@@ -156,7 +151,6 @@ void loop() {
       analogWrite(ForwardOutputPin,Stop);
       analogWrite(AsternOutputPin, Stop);
       Serial.print("Execuated Stop or Initail \n");
-      Serial.print(PWMTEST);
       break;
   }
 }
@@ -166,7 +160,7 @@ int ShipCommandProcess(float PotentiometerValue1){
       if(PotentiometerValue1 == 0){
         ControlCommand1 = 1;           //Astern, PIN 10(100% PWM), PIN 9(0% PWM)
       }
-      else if(PotentiometerValue1 == 512){
+      else if(PotentiometerValue1 >= 520 && PotentiometerValue1 <= 550){
         ControlCommand1 = 2;           // Standby, PIN 10(0% PWM), PIN 9(0% PWM)
       }
       else if(PotentiometerValue1 == 1023 ){ 
@@ -178,12 +172,12 @@ int ShipCommandProcess(float PotentiometerValue1){
       else{
         ControlCommand1 = 0;           // Stop or Initial 
       }      
-      /*
+      
       Serial.print("Value: ");
-      Serial.print(PotentiometerValue);
+      Serial.print(PotentiometerValue1);
       Serial.print(" ,ControlCommand: ");
       Serial.print(ControlCommand);
       Serial.print("\n ");
-      */
+      
       return ControlCommand1;
 }
