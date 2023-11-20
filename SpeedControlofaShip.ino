@@ -26,9 +26,7 @@ The value of the potentiometer should be read with approximately20 Hz.
 float PotentiometerValue  = 0;
 int ControlCommand        = 0;
 int timer0account         = 39;
-//PWM TEST
-float PWMTEST             = 0;
-
+float volt;
 /*
 struct ShipControlType{
 
@@ -57,11 +55,12 @@ ISR(TIMER0_COMPA_vect){
   timer0account++;
   if(timer0account == 40){
       PotentiometerValue = analogRead(A0);
+      volt = (PotentiometerValue*5.0)/1023.0;
       ControlCommand = ShipCommandProcess(PotentiometerValue);
       //Serial.print(PotentiometerValue);
       timer0account = 0;
   }
-  else{
+  else{//DEBUGGING 
      /* Serial.print("Timer0 wait \n");
       Serial.print(timer0account);
       Serial.print("\n ");
@@ -116,42 +115,49 @@ void loop() {
   switch (ControlCommand) {
 
     case 1:
-      //Astern, PIN 10(100% PWM), PIN 9(0% PWM)
-      analogWrite(ForwardOutputPin,127);
-      //analogWrite(AsternOutputPin, 160);
-      
-      
-      pinMode(ForwardOutputPin,OUTPUT);
-      Serial.print("Execuated Astern \n");
+      //Astern, PIN 3(100% PWM), PIN 11(0% PWM)
+      analogWrite(ForwardOutputPin,Stop);
+      analogWrite(AsternOutputPin, FullSpeed);
+      //Serial.print("Execuated Astern \n");
       break;
 
     case 2:
-    // Standby, PIN 10(0% PWM), PIN 9(0% PWM)
+    // Standby, PIN 3(0% PWM), PIN 11(0% PWM)
       analogWrite(ForwardOutputPin,Stop);
       analogWrite(AsternOutputPin, Stop);
-      Serial.print("Execuated Standby \n");
+      //Serial.print("Execuated Standby \n");
       break;
 
     case 3:
-    // Forward, PIN 10(0% PWM), PIN 9(100% PWM)
+    // Forward, PIN 3(0% PWM), PIN 11(100% PWM)
       analogWrite(ForwardOutputPin,FullSpeed);
-      analogWrite(AsternOutputPin, Stop);
-      Serial.print("Execuated  Forward\n");
+      analogWrite(AsternOutputPin, Stop);                          
+      //Serial.print("Execuated  Forward\n");
       break;
 
     case 4:
-    // Linear
-      analogWrite(ForwardOutputPin,FullSpeed);
+    // Linear below 2.5V
+    //analogWrite(R_PWM, 0); analogWrite(F_PWM, ((-volt+2.5)*255/2.5));
       analogWrite(AsternOutputPin, Stop);
-      Serial.print("Execuated Linear \n");
+      analogWrite(ForwardOutputPin,(-volt+2.5)*255/2.5);
+      //Serial.print("Execuated Linear Below 2.5V \n");
+      break;
+
+    case 5:
+    // Linear OVER 2.5V
+    // analogWrite(F_PWM, 0); analogWrite(R_PWM, ((volt-2.5)*255/2.5));
+      analogWrite(ForwardOutputPin,Stop);
+      analogWrite(AsternOutputPin, (volt-2.5)*255/2.5);
+      //Serial.print("Execuated Linear over 2.5V \n");
       break;
 
     default:
     // Stop or Initial 
       analogWrite(ForwardOutputPin,Stop);
       analogWrite(AsternOutputPin, Stop);
-      Serial.print("Execuated Stop or Initail \n");
+      //Serial.print("Execuated Stop or Initail \n");
       break;
+      
   }
 }
 int ShipCommandProcess(float PotentiometerValue1){
@@ -166,17 +172,20 @@ int ShipCommandProcess(float PotentiometerValue1){
       else if(PotentiometerValue1 == 1023 ){ 
         ControlCommand1 = 3;           // Forward, PIN 10(0% PWM), PIN 9(100% PWM)
       }
-      else if((PotentiometerValue1 >0 && PotentiometerValue1 < 512)||(PotentiometerValue1 >512 && PotentiometerValue1 < 1023)){
-        ControlCommand1 = 4 ;           // Linear 
+      else if((PotentiometerValue1 >0 && PotentiometerValue1 < 520)){
+        ControlCommand1 = 4 ;           // Linear below 2.5V   analogWrite(F_PWM, ((-volt+2.5)*255/2.5));
+      }
+      else if((PotentiometerValue1 >550 && PotentiometerValue1 < 1023)){
+        ControlCommand1 = 5 ;           // Linear over 2.5V  analogWrite(R_PWM, ((volt-2.5)*255/2.5)); 
       }
       else{
         ControlCommand1 = 0;           // Stop or Initial 
       }      
       
-      Serial.print("Value: ");
+      //Serial.print("Value: ");
       Serial.print(PotentiometerValue1);
-      Serial.print(" ,ControlCommand: ");
-      Serial.print(ControlCommand);
+      //Serial.print(" ,ControlCommand: ");
+      //Serial.print(ControlCommand);
       Serial.print("\n ");
       
       return ControlCommand1;
