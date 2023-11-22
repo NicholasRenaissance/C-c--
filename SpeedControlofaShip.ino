@@ -25,7 +25,7 @@ The value of the potentiometer should be read with approximately20 Hz.
 
 float PotentiometerValue  = 0;
 int ControlCommand        = 0;
-int timer0account         = 39;
+int timer0account         = 12;
 float volt;
 /*
 struct ShipControlType{
@@ -47,6 +47,8 @@ Time of interrupt = (1*255)/16M =4.1ms (12times approximately 50ms)
 
 In COMPARE model,OCR0A = [16MHz/(Clock Division*hz)]-1
                  hz = 16MHz/[Clock Division*(OCR0A+1)]
+                 f=(16Mhz/(256*(255+1)))=244.14Hz
+                 F=0.004s
 
 */
 ISR(TIMER0_COMPA_vect){
@@ -79,7 +81,7 @@ void setup() {
 
   Serial.begin(9600);
   noInterrupts();
-    //-----------------------------Timer1 Fast PWM model(16MHz / 32 / 256 = 7:8125 kHz)
+    //-----------------------------Timer2 Fast PWM model(16MHz / 32 / 256 = 7:8125 kHz)
   /*
   TCCR1A = 0;
   TCCR1B = 0;
@@ -107,7 +109,7 @@ void setup() {
   TCNT0 = 0;
   OCR0A = 255;
   TCCR0A |= (1 << WGM01);
-  TCCR0B |= (1 << CS00);
+  TCCR0B |= (1 << CS02);
   TIMSK0 |= (1 << OCIE0A);
   interrupts();
 
@@ -122,21 +124,21 @@ void loop() {
       //Astern, PIN 3(100% PWM), PIN 11(0% PWM)
       analogWrite(ForwardOutputPin,Stop);
       analogWrite(AsternOutputPin, FullSpeed);
-      //Serial.print("Execuated Astern \n");
+      Serial.print("Execuated Astern \n");
       break;
 
     case 2:
     // Standby, PIN 3(0% PWM), PIN 11(0% PWM)
       analogWrite(ForwardOutputPin,Stop);
       analogWrite(AsternOutputPin, Stop);
-      //Serial.print("Execuated Standby \n");
+      Serial.print("Execuated Standby \n");
       break;
 
     case 3:
     // Forward, PIN 3(0% PWM), PIN 11(100% PWM)
       analogWrite(AsternOutputPin, Stop); 
       analogWrite(ForwardOutputPin,FullSpeed);                        
-      //Serial.print("Execuated  Forward\n");
+      Serial.print("Execuated  Forward\n");
       break;
 
     case 4:
@@ -144,7 +146,7 @@ void loop() {
     //analogWrite(R_PWM, 0); analogWrite(F_PWM, ((-volt+2.5)*255/2.5));
       analogWrite(AsternOutputPin, (-volt+2.5)*255/2.5);
       //analogWrite(ForwardOutputPin,Stop);
-      //Serial.print("Execuated Linear Below 2.5V \n");
+      Serial.print("Execuated Linear Below 2.5V \n");
       break;
 
     case 5:
@@ -152,14 +154,14 @@ void loop() {
     // analogWrite(F_PWM, 0); analogWrite(R_PWM, ((volt-2.5)*255/2.5));
       analogWrite(ForwardOutputPin,(volt-2.5)*255/2.5);
       //analogWrite(AsternOutputPin, Stop);
-      //Serial.print("Execuated Linear over 2.5V \n");
+      Serial.print("Execuated Linear over 2.5V \n");
       break;
 
     default:
     // Stop or Initial 
       analogWrite(ForwardOutputPin,Stop);
       analogWrite(AsternOutputPin, Stop);
-      //Serial.print("Execuated Stop or Initail \n");
+      Serial.print("Execuated Stop or Initail \n");
       break;
       
   }
