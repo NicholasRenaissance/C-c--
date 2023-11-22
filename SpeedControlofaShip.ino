@@ -72,6 +72,10 @@ void setup() {
   // put your setup code here, to run once:
   pinMode(ForwardOutputPin,OUTPUT);
   pinMode(AsternOutputPin,OUTPUT);
+  pinMode(F_EN,OUTPUT);
+  pinMode(R_EN,OUTPUT);
+  digitalWrite(F_EN,HIGH); // Enable F_EN
+  digitalWrite(R_EN,HIGH); // ENable R_EN
 
   Serial.begin(9600);
   noInterrupts();
@@ -130,24 +134,24 @@ void loop() {
 
     case 3:
     // Forward, PIN 3(0% PWM), PIN 11(100% PWM)
-      analogWrite(ForwardOutputPin,FullSpeed);
-      analogWrite(AsternOutputPin, Stop);                          
+      analogWrite(AsternOutputPin, Stop); 
+      analogWrite(ForwardOutputPin,FullSpeed);                        
       //Serial.print("Execuated  Forward\n");
       break;
 
     case 4:
     // Linear below 2.5V
     //analogWrite(R_PWM, 0); analogWrite(F_PWM, ((-volt+2.5)*255/2.5));
-      analogWrite(AsternOutputPin, Stop);
-      analogWrite(ForwardOutputPin,(-volt+2.5)*255/2.5);
+      analogWrite(AsternOutputPin, (-volt+2.5)*255/2.5);
+      //analogWrite(ForwardOutputPin,Stop);
       //Serial.print("Execuated Linear Below 2.5V \n");
       break;
 
     case 5:
     // Linear OVER 2.5V
     // analogWrite(F_PWM, 0); analogWrite(R_PWM, ((volt-2.5)*255/2.5));
-      analogWrite(ForwardOutputPin,Stop);
-      analogWrite(AsternOutputPin, (volt-2.5)*255/2.5);
+      analogWrite(ForwardOutputPin,(volt-2.5)*255/2.5);
+      //analogWrite(AsternOutputPin, Stop);
       //Serial.print("Execuated Linear over 2.5V \n");
       break;
 

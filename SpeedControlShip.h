@@ -10,8 +10,10 @@
       #define   SlowSpeed     10
       #define   Stop          0               //Case shutDown exe via other sing
       #define   StandBy       0 
-      #define   AsternOutputPin      9        //PIN 9
-      #define   ForwardOutputPin     10       //PIN10
+      #define   AsternOutputPin      3        //PIN 9
+      #define   ForwardOutputPin     11       //PIN10
+      #define            F_EN       6
+      #define            R_EN       5
       int ShipCommandProcess(float PotentiometerValue1);
   #endif
 
