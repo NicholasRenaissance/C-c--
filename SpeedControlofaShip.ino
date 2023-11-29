@@ -59,7 +59,8 @@ ISR(TIMER0_COMPA_vect){
       PotentiometerValue = analogRead(A0);
       volt = (PotentiometerValue*5.0)/1023.0;
       ControlCommand = ShipCommandProcess(PotentiometerValue);
-      //Serial.print(PotentiometerValue);
+      Serial.print(volt);
+      Serial.print("\n");
       timer0account = 0;
   }
   else{//DEBUGGING 
@@ -124,21 +125,21 @@ void loop() {
       //Astern, PIN 3(100% PWM), PIN 11(0% PWM)
       analogWrite(ForwardOutputPin,Stop);
       analogWrite(AsternOutputPin, FullSpeed);
-      Serial.print("Execuated Astern \n");
+      //Serial.print("Execuated Astern \n");
       break;
 
     case 2:
     // Standby, PIN 3(0% PWM), PIN 11(0% PWM)
       analogWrite(ForwardOutputPin,Stop);
       analogWrite(AsternOutputPin, Stop);
-      Serial.print("Execuated Standby \n");
+      //Serial.print("Execuated Standby \n");
       break;
 
     case 3:
     // Forward, PIN 3(0% PWM), PIN 11(100% PWM)
       analogWrite(AsternOutputPin, Stop); 
       analogWrite(ForwardOutputPin,FullSpeed);                        
-      Serial.print("Execuated  Forward\n");
+      //Serial.print("Execuated  Forward\n");
       break;
 
     case 4:
@@ -146,7 +147,7 @@ void loop() {
     //analogWrite(R_PWM, 0); analogWrite(F_PWM, ((-volt+2.5)*255/2.5));
       analogWrite(AsternOutputPin, (-volt+2.5)*255/2.5);
       //analogWrite(ForwardOutputPin,Stop);
-      Serial.print("Execuated Linear Below 2.5V \n");
+      //Serial.print("Execuated Linear Below 2.5V \n");
       break;
 
     case 5:
@@ -154,20 +155,21 @@ void loop() {
     // analogWrite(F_PWM, 0); analogWrite(R_PWM, ((volt-2.5)*255/2.5));
       analogWrite(ForwardOutputPin,(volt-2.5)*255/2.5);
       //analogWrite(AsternOutputPin, Stop);
-      Serial.print("Execuated Linear over 2.5V \n");
+      //Serial.print("Execuated Linear over 2.5V \n");
       break;
 
     default:
     // Stop or Initial 
       analogWrite(ForwardOutputPin,Stop);
       analogWrite(AsternOutputPin, Stop);
-      Serial.print("Execuated Stop or Initail \n");
+      //Serial.print("Execuated Stop or Initail \n");
       break;
       
   }
 }
-int ShipCommandProcess(float PotentiometerValue1){
 
+int ShipCommandProcess(float PotentiometerValue1){
+ 
       int ControlCommand1;
       if(PotentiometerValue1 == 0){
         ControlCommand1 = 1;           //Astern, PIN 10(100% PWM), PIN 9(0% PWM)
@@ -189,10 +191,10 @@ int ShipCommandProcess(float PotentiometerValue1){
       }      
       
       //Serial.print("Value: ");
-      Serial.print(PotentiometerValue1);
+      //Serial.print(PotentiometerValue1);
       //Serial.print(" ,ControlCommand: ");
       //Serial.print(ControlCommand);
-      Serial.print("\n ");
+      //Serial.print("\n ");
       
       return ControlCommand1;
 }
